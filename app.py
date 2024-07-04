@@ -6,6 +6,36 @@ import subprocess
 # Base directory where all the playground folders will be created
 BASE_DIR = 'D:\\MyAppsData\\codepg'  # Change this to your actual directory
 
+SUPPORTED_LANGUAGES = {
+    'python': '.py',
+    'javascript': '.js',
+    'java': '.java',
+    'csharp': '.cs',
+    'cpp': '.cpp',
+    'ruby': '.rb',
+    'go': '.go',
+    'rust': '.rs',
+    'kotlin': '.kt',
+    'swift': '.swift',
+    'typescript': '.ts',
+    'html': '.html',
+    'css': '.css',
+    'php': '.php',
+    'shell': '.sh',
+    'perl': '.pl',
+    'r': '.r',
+    'scala': '.scala',
+    'lua': '.lua',
+    'dart': '.dart',
+    'haskell': '.hs',
+    'elixir': '.ex',
+    'clojure': '.clj',
+    'groovy': '.groovy',
+    'matlab': '.m',
+    'powershell': '.ps1',
+    'vbscript': '.vbs'
+}
+
 # Ensure the base directory exists
 try:
     if not os.path.exists(BASE_DIR):
@@ -34,13 +64,7 @@ def create_file(language: str, filename: str) -> None:
         os.makedirs(today_folder, exist_ok=True)
 
         # Define file extensions for supported languages
-        extension = {
-            'python': '.py',
-            'javascript': '.js',
-            'java': '.java',
-            'csharp': '.cs',
-            'cpp': '.cpp'
-        }.get(language, '')
+        extension = SUPPORTED_LANGUAGES.get(language, '')
 
         # Check if the language is supported
         if not extension:
