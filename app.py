@@ -53,6 +53,7 @@ def create_file(language: str, filename: str) -> None:
     filename (str): The name of the file to be created (without extension).
     """
     try:
+        language = language.lower()
         # Get today's date in YYYY-MM-DD format
         today = datetime.date.today().strftime("%Y-%m-%d")
         
@@ -108,7 +109,9 @@ def show_help() -> None:
                                in a folder named with the date of the day it was created.
                                Opens a code editor with that playground folder.
     
-    Supported languages: python, javascript, java, csharp, cpp
+    Supported languages: python, javascript, java, csharp, cpp, ruby, go, rust, kotlin, swift,
+                         typescript, html, css, php, shell, perl, r, scala, lua, dart, haskell,
+                         elixir, clojure, groovy, matlab, powershell, vbscript
     """
     print(help_text)
 
@@ -120,7 +123,7 @@ if __name__ == "__main__":
     parser.add_argument('language', nargs='?', help='The Programming Language you want to play with. (e.g., python, javascript)')
     
     # Optional flag to create a new file
-    parser.add_argument('--file', action='store_true', help='Creates a new file')
+    parser.add_argument('--file', nargs='?', help='Creates a new file with the specified filename (provide without extension)')
 
     # Parse the command-line arguments
     args = parser.parse_args()
@@ -130,9 +133,10 @@ if __name__ == "__main__":
         show_help()
     else:
         # If the --file flag is set, prompt for the filename and create the file
-        if args.file:
-            filename = input("Enter the filename (without extension): ")
-            create_file(args.language, filename)
+        if args.file is not None:
+            create_file(args.language, args.file)
         else:
             # Otherwise, show the help text
-            show_help()
+            filename = input("Enter the filename (without extension): ")
+            create_file(args.language, filename)
+            
