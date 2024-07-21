@@ -2,10 +2,10 @@ import argparse
 import os
 import datetime
 import subprocess
-import config_handler
+import utils
 
 # Base directory where all the playground folders will be created
-BASE_DIR = config_handler.get_base_dir()  # Change this to your actual directory
+BASE_DIR = utils.get_base_dir()  # Change this to your actual directory
 
 SUPPORTED_EXTENSIONS = {
   '.py': 'python',
