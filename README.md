@@ -12,7 +12,7 @@ CodePG is a command-line interface (CLI) application designed to automate the se
 
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/your-username/CodePG.git
+   git clone https://github.com/AkhileshMalthi/CodePG.git
    cd CodePG
    ```
 
@@ -22,37 +22,24 @@ CodePG is a command-line interface (CLI) application designed to automate the se
    . venv/bin/activate  # On Windows use `venv\Scripts\activate`
    ```
 
-3. **Install Dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Configure Base Directory**:
+3. **Set Some Configurations**:
    - Open `app.py` and modify `BASE_DIR` to specify the base directory where playground folders will be created.
+   - Add `codepg.bat` to `PATH`
 
 ## Usage
 
 ### View Help
 ```bash
-python app.py
+codepg --help
 ```
 
 ### Create a New File
 ```bash
-python app.py python --file
+codepg filename.py
 ```
-This command prompts for a filename and creates a Python file (`filename.py`) in today's date folder under `python-playground`. It then opens Visual Studio Code with the folder.
-
-Replace `python` with other supported languages like `javascript`, `java`, `csharp`, or `cpp`.
-
-## Command Line Arguments
-
-- **Positional Argument**:
-  - `language`: The programming language (e.g., python, javascript).
-
-- **Optional Flags**:
-  - `--file`: Creates a new file for the specified language.
+This command creates the `filename.py` in the DD-MM-YYYY ( The date it was created) folder in the python-playground directory ( which is got by the extension of the filename ).
+ It then opens Visual Studio Code with the folder.
 
 ## Support
 
-For any issues or suggestions, please [open an issue](https://github.com/your-username/CodePG/issues).
+For any issues or suggestions, please [open an issue](https://github.com/AkhileshMalthi/CodePG/issues).
