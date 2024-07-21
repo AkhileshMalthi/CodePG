@@ -2,10 +2,10 @@ import argparse
 import os
 import datetime
 import subprocess
-import config_handler
+import utils
 
 # Base directory where all the playground folders will be created
-BASE_DIR = config_handler.get_base_dir()  # Change this to your actual directory
+BASE_DIR = utils.get_base_dir()  # Change this to your actual directory
 
 SUPPORTED_EXTENSIONS = {
   '.py': 'python',
@@ -98,22 +98,6 @@ def create_file(filename: str) -> None:
         print(f"Error creating directories: {e}")
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
-
-
-def show_help() -> None:
-    """
-    Display the help text for the CLI application.
-    """
-    help_text = """
-    CodePG - A CLI application to automate coding playground setup.
-
-    Usage: codepg <filename>
-
-    <filename> is the name of the file you want to create, including the extension.
-
-    Supported extensions: {}
-    """.format(', '.join(SUPPORTED_EXTENSIONS.keys()))
-    print(help_text)
 
 
 if __name__ == "__main__":
