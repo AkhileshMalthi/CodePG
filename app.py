@@ -8,33 +8,33 @@ import config_handler
 BASE_DIR = config_handler.get_base_dir()  # Change this to your actual directory
 
 SUPPORTED_EXTENSIONS = {
-    'py': 'python',
-    'js': 'javascript',
-    'java': 'java',
-    'cs': 'csharp',
-    'cpp': 'cpp',
-    'rb': 'ruby',
-    'go': 'go',
-    'rs': 'rust',
-    'kt': 'kotlin',
-    'swift': 'swift',
-    'ts': 'typescript',
-    'html': 'html',
-    'css': 'css',
-    'php': 'php',
-    'sh': 'shell',
-    'pl': 'perl',
-    'r': 'r',
-    'scala': 'scala',
-    'lua': 'lua',
-    'dart': 'dart',
-    'hs': 'haskell',
-    'ex': 'elixir',
-    'clj': 'clojure',
-    'groovy': 'groovy',
-    'm': 'matlab',
-    'ps1': 'powershell',
-    'vbs': 'vbscript'
+  '.py': 'python',
+  '.js': 'javascript',
+  '.java': 'java',
+  '.cs': 'csharp',
+  '.cpp': 'cpp',
+  '.rb': 'ruby',
+  '.go': 'go',
+  '.rs': 'rust',
+  '.kt': 'kotlin',
+  '.swift': 'swift',
+  '.ts': 'typescript',
+  '.html': 'html',
+  '.css': 'css',
+  '.php': 'php',
+  '.sh': 'shell',
+  '.pl': 'perl',
+  '.r': 'r',
+  '.scala': 'scala',
+  '.lua': 'lua',
+  '.dart': 'dart',
+  '.hs': 'haskell',
+  '.ex': 'elixir',
+  '.clj': 'clojure',
+  '.groovy': 'groovy',
+  '.m': 'matlab',
+  '.ps1': 'powershell',
+  '.vbs': 'vbscript'
 }
 
 # Ensure the base directory exists
@@ -117,5 +117,14 @@ def show_help() -> None:
 
 
 if __name__ == "__main__":
-    # Set up argument parsing
-    parser = argparse.ArgumentParser(description="CodePG - A CLI application to automate coding playground setup")
+  # Set up argument parsing
+  parser = argparse.ArgumentParser(description="CodePG - A CLI application to automate coding playground setup")
+
+  # Add argument for filename
+  parser.add_argument("filename", type=str, help="The name of the file to be created (including extension).")
+
+  # Parse arguments
+  args = parser.parse_args()
+
+  # Call create_file function with the parsed filename
+  create_file(args.filename)
