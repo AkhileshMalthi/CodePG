@@ -24,7 +24,7 @@ CodePG is a command-line interface (CLI) application designed to automate the se
 
 3. **Set Some Configurations**:
    - Open `app.py` and modify `BASE_DIR` to specify the base directory where playground folders will be created.
-   - Add `codepg.bat` to `PATH`
+   - Provide the `app.py` path in `codepg.bat` file and Add `codepg.bat` to `PATH`
 
 ## Usage
 
