@@ -1,2 +1,2 @@
 @echo off
-python "D:\Projects\CodePG\src\app.py" %*
+python "Path of app.py" %*
