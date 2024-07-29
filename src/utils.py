@@ -43,18 +43,3 @@ def get_base_dir():
 
   # Return the base directory
   return base_dir
-
-def show_help() -> None:
-    """
-    Display the help text for the CLI application.
-    """
-    help_text = """
-    CodePG - A CLI application to automate coding playground setup.
-
-    Usage: codepg <filename>
-
-    <filename> is the name of the file you want to create, including the extension.
-
-    Supported extensions: {}
-    """.format(', '.join(SUPPORTED_EXTENSIONS.keys()))
-    print(help_text)
