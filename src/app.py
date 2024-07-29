@@ -5,37 +5,9 @@ import subprocess
 import utils
 
 # Base directory where all the playground folders will be created
-BASE_DIR = utils.get_base_dir()  # Change this to your actual directory
+BASE_DIR = utils.get_base_dir()
 
-SUPPORTED_EXTENSIONS = {
-  '.py': 'python',
-  '.js': 'javascript',
-  '.java': 'java',
-  '.cs': 'csharp',
-  '.cpp': 'cpp',
-  '.rb': 'ruby',
-  '.go': 'go',
-  '.rs': 'rust',
-  '.kt': 'kotlin',
-  '.swift': 'swift',
-  '.ts': 'typescript',
-  '.html': 'html',
-  '.css': 'css',
-  '.php': 'php',
-  '.sh': 'shell',
-  '.pl': 'perl',
-  '.r': 'r',
-  '.scala': 'scala',
-  '.lua': 'lua',
-  '.dart': 'dart',
-  '.hs': 'haskell',
-  '.ex': 'elixir',
-  '.clj': 'clojure',
-  '.groovy': 'groovy',
-  '.m': 'matlab',
-  '.ps1': 'powershell',
-  '.vbs': 'vbscript'
-}
+SUPPORTED_EXTENSIONS = utils.get_supported_languages()
 
 # Ensure the base directory exists
 try:
