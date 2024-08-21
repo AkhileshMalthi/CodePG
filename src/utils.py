@@ -44,45 +44,32 @@ def get_base_dir():
   return base_dir
 
 def get_supported_languages():
-    config_file = "config.ini"
-    config = configparser.ConfigParser()
-
-    # Use default supported languages if the file not found
-    if not os.path.exists(config_file):
-        print("Configuration file not found. Using default supported languages.")
-        return {
-        '.py': 'python',
-        '.js': 'javascript',
-        '.java': 'java',
-        '.cs': 'csharp',
-        '.cpp': 'cpp',
-        '.rb': 'ruby',
-        '.go': 'go',
-        '.rs': 'rust',
-        '.kt': 'kotlin',
-        '.swift': 'swift',
-        '.ts': 'typescript',
-        '.html': 'html',
-        '.css': 'css',
-        '.php': 'php',
-        '.sh': 'shell',
-        '.pl': 'perl',
-        '.r': 'r',
-        '.scala': 'scala',
-        '.lua': 'lua',
-        '.dart': 'dart',
-        '.hs': 'haskell',
-        '.ex': 'elixir',
-        '.clj': 'clojure',
-        '.groovy': 'groovy',
-        '.m': 'matlab',
-        '.ps1': 'powershell',
-        '.vbs': 'vbscript'
-      }
-
-    # otherwise read the file and return the languages in the config file
-    config.read(config_file)
-    languages = {}
-    for key, value in config['languages'].items():
-        languages['.' + key] = value
-    return languages
+  return {
+      '.py': 'python',
+      '.js': 'javascript',
+      '.java': 'java',
+      '.cs': 'csharp',
+      '.cpp': 'cpp',
+      '.rb': 'ruby',
+      '.go': 'go',
+      '.rs': 'rust',
+      '.kt': 'kotlin',
+      '.swift': 'swift',
+      '.ts': 'typescript',
+      '.html': 'html',
+      '.css': 'css',
+      '.php': 'php',
+      '.sh': 'shell',
+      '.pl': 'perl',
+      '.r': 'r',
+      '.scala': 'scala',
+      '.lua': 'lua',
+      '.dart': 'dart',
+      '.hs': 'haskell',
+      '.ex': 'elixir',
+      '.clj': 'clojure',
+      '.groovy': 'groovy',
+      '.m': 'matlab',
+      '.ps1': 'powershell',
+      '.vbs': 'vbscript'
+    }
