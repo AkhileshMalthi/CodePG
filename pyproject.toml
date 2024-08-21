@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "codepg"
+version = "0.1.0"
+description = "Automate coding playground setup"
+authors = ["AkhileshMalthi <akhileshmalthi2299@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.7"  # Adjust based on your Python requirements
+argparse = "^1.4"
+os = "^3.10"
+datetime = "^4.10"
+subprocess = "^3.10"
+configparser = "^5.3"
+
+[tool.poetry.scripts]
+codepg = 'codepg/app:main'
