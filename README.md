@@ -1,45 +1,79 @@
-# CodePG
+# CodePG - Code Playground Generator
 
-CodePG is a command-line interface (CLI) application designed to automate the setup of coding playgrounds for various programming languages. It simplifies the process of creating and managing files in dedicated folders, along with opening them in a code editor for immediate use.
+CodePG is a command-line tool that helps you organize and automate your coding practice by creating date-organized folders and files for various programming languages.
 
 ## Features
 
-- **File Creation**: Create new files for supported programming languages in date-specific folders.
-- **Supported Languages**: Python, JavaScript, Java, C#, C++.
-- **Visual Studio Code Integration**: Automatically open the created file in Visual Studio Code for editing.
+- Creates organized folders by language and date
+- Automatically opens your preferred editor
+- Supports multiple programming languages
+- Configurable through a JSON configuration file
+- Includes language-specific file templates
 
 ## Installation
 
-1. **Clone the Repository**:
-   ```bash
-   git clone https://github.com/AkhileshMalthi/CodePG.git
-   cd CodePG
-   ```
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/CodePG.git
 
-2. **Setup Virtual Environment** (Optional but recommended):
-   ```bash
-   python -m venv venv
-   . venv/bin/activate  # On Windows use `venv\Scripts\activate`
-   ```
+# Navigate to the directory
+cd CodePG
 
-3. **Set Some Configurations**:
-   - Open `app.py` and modify `BASE_DIR` to specify the base directory where playground folders will be created.
-   - Provide the `app.py` path in `codepg.bat` file and Add `codepg.bat` to `PATH`
+# Install the package
+pip install -e .
+```
 
 ## Usage
 
-### View Help
 ```bash
-codepg --help
+# Create a Python file
+codepg hello.py
+
+# Create a JavaScript file with a custom config
+codepg script.js --config ./my_config.json
+
+# Create a file without opening an editor
+codepg test.py --no-editor
 ```
 
-### Create a New File
-```bash
-codepg filename.py
+## Configuration
+
+CodePG looks for configuration in the following locations (in order):
+
+1. Path specified with --config argument
+2. ./codepg_config.json (in the current directory)
+3. ~/.config/codepg/config.json
+4. ~/.codepg.json
+
+Example configuration:
+
+```json
+{
+    "base_dir": "D:/CodePlaygrounds",
+    "editor_command": "code \"{path}\""
+}
 ```
-This command creates the `filename.py` in the DD-MM-YYYY ( The date it was created) folder in the python-playground directory ( which is got by the extension of the filename ).
- It then opens Visual Studio Code with the folder.
 
-## Support
+## Supported Languages
 
-For any issues or suggestions, please [open an issue](https://github.com/AkhileshMalthi/CodePG/issues).
+CodePG currently supports the following file extensions:
+
+- Python (.py)
+- JavaScript (.js)
+- TypeScript (.ts)
+- HTML (.html)
+- CSS (.css)
+- Go (.go)
+- Rust (.rs)
+- C (.c, .h)
+- C++ (.cpp, .hpp)
+- Java (.java)
+- C# (.cs)
+- PHP (.php)
+- Ruby (.rb)
+- Shell (.sh)
+- And many more!
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
