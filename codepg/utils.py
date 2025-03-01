@@ -67,10 +67,10 @@ def detect_default_editor() -> Optional[str]:
     # Platform-specific defaults
     if system == "windows":
         if is_command_available("notepad"):
-            return 'notepad "{{path}}"'
+            return 'notepad "{path}"'
     elif system == "darwin":  # macOS
         if is_command_available("open"):
-            return 'open -a TextEdit "{{path}}"'
+            return 'open -a TextEdit "{path}"'
     else:  # Linux and others
         for editor in ["nano", "vim", "gedit", "xed"]:
             if is_command_available(editor):
