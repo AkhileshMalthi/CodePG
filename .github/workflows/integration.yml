@@ -1,0 +1,58 @@
+name: Integration Tests
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  integration:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+      with:
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+        
+    - name: Install package
+      run: |
+        poetry install --no-interaction
+        
+    - name: Run integration tests
+      run: |
+        # Create a test directory
+        mkdir -p integration_test
+        cd integration_test
+        
+        # Test basic usage
+        poetry run codepg create test_file.py --no-editor
+        
+        # Test config commands
+        poetry run codepg config --init
+        poetry run codepg config --show
+        
+        # Verify files were created correctly
+        PYPATH=$(find $HOME/CodePG -name "test_file.py" | head -n 1)
+        if [ -z "$PYPATH" ]; then
+          echo "Failed to create test file"
+          exit 1
+        else
+          echo "Successfully created: $PYPATH"
+          cat "$PYPATH"
+        fi
+      shell: bash
