@@ -25,25 +25,58 @@ pip install -e .
 
 ## Usage
 
+### Creating Files
+
 ```bash
 # Create a Python file
+codepg create hello.py
+
+# For backward compatibility, you can omit the 'create' command
 codepg hello.py
 
 # Create a JavaScript file with a custom config
-codepg script.js --config ./my_config.json
+codepg create script.js --config ./my_config.json
 
 # Create a file without opening an editor
-codepg test.py --no-editor
+codepg create test.py --no-editor
+```
+
+### Managing Configuration
+
+```bash
+# Create a default configuration file
+codepg config --init
+
+# Create and immediately open the configuration file in your editor
+codepg config --init --edit
+
+# View your current configuration
+codepg config --show
+
+# Set a configuration option
+codepg config --set base_dir "D:/CodePlaygrounds"
+codepg config --set editor_command "sublime \"{path}\""
+
+# Edit your configuration in your default editor
+codepg config --edit
+
+# Specify a custom configuration file
+codepg config --file "./custom_config.json" --show
 ```
 
 ## Configuration
 
+### Configuration Locations
+
 CodePG looks for configuration in the following locations (in order):
 
-1. Path specified with --config argument
-2. ./codepg_config.json (in the current directory)
-3. ~/.config/codepg/config.json
-4. ~/.codepg.json
+1. Path specified with `--config` argument or `--file` for config commands
+2. Path in environment variable `CODEPG_CONFIG_FILE`
+3. `./codepg_config.json` (in the current directory)
+4. `~/.config/codepg/config.json`
+5. `~/.codepg.json`
+
+### Configuration Options
 
 Example configuration:
 
@@ -52,6 +85,21 @@ Example configuration:
     "base_dir": "D:/CodePlaygrounds",
     "editor_command": "code \"{path}\""
 }
+```
+
+### Environment Variables
+
+You can also use environment variables to override configuration:
+
+```bash
+# Set the base directory for code playgrounds
+export CODEPG_BASE_DIR="D:/CodePlaygrounds"
+
+# Set the editor command
+export CODEPG_EDITOR_COMMAND="vim \"{path}\""
+
+# Specify a config file to use
+export CODEPG_CONFIG_FILE="./my_config.json"
 ```
 
 ## Supported Languages
