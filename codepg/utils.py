@@ -1,75 +1,105 @@
 import os
-import configparser  # Assuming you're using INI format
+import platform
+from typing import Dict, Optional
 
-def get_base_dir():
-  """
-  Reads the base directory from the configuration file or prompts the user.
-  Ensures the base directory exists and creates it if necessary.
+def get_base_dir() -> str:
+    """
+    Get the base directory for code playgrounds.
+    
+    Returns:
+        str: Path to the base directory.
+    """
+    # Default base directory is in the user's home directory
+    base_dir = os.path.expanduser("~/CodePG")
+    
+    # Check if environment variable is set
+    if "CODEPG_BASE_DIR" in os.environ:
+        base_dir = os.environ["CODEPG_BASE_DIR"]
+    
+    return base_dir
 
-  Returns:
-      str: The base directory path.
-  """
-  config_file = "config.ini"
-  config = configparser.ConfigParser()
-
-  # Check for configuration file
-  if not os.path.exists(config_file):
-    print(f"Configuration file {config_file} not found. Setting up base directory...")
-
-  # Read config or create a new one if not found
-  config.read(config_file)
-
-  # Check if base_dir is set in the DEFAULT section
-  base_dir = config.get("DEFAULT", "base_dir", fallback=None)
-
-  if not base_dir:
-    # Prompt user for base directory
-    base_dir = input("Enter the base directory for CodePG playgrounds: ")
-    # if not config.has_section("DEFAULT"):
-    #   config.add_section("DEFAULT")
-    config.set("DEFAULT", "base_dir", base_dir)
-    with open(config_file, "w") as f:
-      config.write(f)
-
-  # Ensure the base directory exists (prevent potential security issues)
-  if not os.path.exists(base_dir):
-    try:
-      os.makedirs(base_dir)
-      print(f"Created base directory: {base_dir}")
-    except OSError as e:
-      print(f"Error creating base directory: {e}")
-      exit(1)
-
-  # Return the base directory
-  return base_dir
-
-def get_supported_languages():
-  return {
-      '.py': 'python',
-      '.js': 'javascript',
-      '.java': 'java',
-      '.cs': 'csharp',
-      '.cpp': 'cpp',
-      '.rb': 'ruby',
-      '.go': 'go',
-      '.rs': 'rust',
-      '.kt': 'kotlin',
-      '.swift': 'swift',
-      '.ts': 'typescript',
-      '.html': 'html',
-      '.css': 'css',
-      '.php': 'php',
-      '.sh': 'shell',
-      '.pl': 'perl',
-      '.r': 'r',
-      '.scala': 'scala',
-      '.lua': 'lua',
-      '.dart': 'dart',
-      '.hs': 'haskell',
-      '.ex': 'elixir',
-      '.clj': 'clojure',
-      '.groovy': 'groovy',
-      '.m': 'matlab',
-      '.ps1': 'powershell',
-      '.vbs': 'vbscript'
+def get_supported_languages() -> Dict[str, str]:
+    """
+    Get a dictionary mapping file extensions to language names.
+    
+    Returns:
+        Dict[str, str]: Dictionary mapping extensions to language names.
+    """
+    return {
+        '.py': 'python',
+        '.js': 'javascript',
+        '.ts': 'typescript',
+        '.html': 'html',
+        '.css': 'css',
+        '.go': 'go',
+        '.rs': 'rust',
+        '.c': 'c',
+        '.cpp': 'cpp',
+        '.h': 'c',
+        '.hpp': 'cpp',
+        '.java': 'java',
+        '.cs': 'csharp',
+        '.php': 'php',
+        '.rb': 'ruby',
+        '.sh': 'shell',
+        '.swift': 'swift',
+        '.kt': 'kotlin',
+        '.r': 'r',
+        '.sql': 'sql',
+        '.lua': 'lua',
+        '.dart': 'dart',
     }
+
+def detect_default_editor() -> Optional[str]:
+    """
+    Detect the default editor command for the current platform.
+    
+    Returns:
+        Optional[str]: Command to launch the default code editor, or None if detection fails.
+    """
+    system = platform.system().lower()
+    
+    # Try to find VSCode first as it's common across platforms
+    for vscode_cmd in ["code", "code-insiders"]:
+        if is_command_available(vscode_cmd):
+            return f'{vscode_cmd} "{{path}}"'
+    
+    # Platform-specific defaults
+    if system == "windows":
+        if is_command_available("notepad"):
+            return 'notepad "{{path}}"'
+    elif system == "darwin":  # macOS
+        if is_command_available("open"):
+            return 'open -a TextEdit "{{path}}"'
+    else:  # Linux and others
+        for editor in ["nano", "vim", "gedit", "xed"]:
+            if is_command_available(editor):
+                return f'{editor} "{{path}}"'
+    
+    return None
+
+def is_command_available(cmd: str) -> bool:
+    """
+    Check if a command is available in the system.
+    
+    Parameters:
+        cmd (str): The command to check.
+        
+    Returns:
+        bool: True if the command is available, False otherwise.
+    """
+    try:
+        from shutil import which
+        return which(cmd) is not None
+    except ImportError:
+        # Fallback method for older Python versions
+        import subprocess
+        try:
+            devnull = open(os.devnull, 'w')
+            if platform.system().lower() == "windows":
+                subprocess.check_call(f"where {cmd}", stdout=devnull, stderr=devnull, shell=True)
+            else:
+                subprocess.check_call(f"which {cmd}", stdout=devnull, stderr=devnull, shell=True)
+            return True
+        except subprocess.CalledProcessError:
+            return False
