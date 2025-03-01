@@ -47,12 +47,23 @@ jobs:
         poetry run codepg config --show
         
         # Verify files were created correctly
-        PYPATH=$(find $HOME/CodePG -name "test_file.py" | head -n 1)
-        if [ -z "$PYPATH" ]; then
-          echo "Failed to create test file"
-          exit 1
+        if [ "$RUNNER_OS" == "Windows" ]; then
+          PYPATH=$(Get-ChildItem -Path "$HOME\CodePG" -Recurse -Include "test_file.py" | Select-Object -First 1 -ExpandProperty FullName)
+          if (-not $PYPATH) {
+            echo "Failed to create test file"
+            exit 1
+          } else {
+            echo "Successfully created: $PYPATH"
+            Get-Content "$PYPATH"
+          }
         else
-          echo "Successfully created: $PYPATH"
-          cat "$PYPATH"
+          PYPATH=$(find $HOME/CodePG -name "test_file.py" | head -n 1)
+          if [ -z "$PYPATH" ]; then
+            echo "Failed to create test file"
+            exit 1
+          else
+            echo "Successfully created: $PYPATH"
+            cat "$PYPATH"
+          }
         fi
       shell: bash

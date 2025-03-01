@@ -5,8 +5,10 @@ import subprocess
 from typing import Optional, Dict, Any
 from pathlib import Path
 import sys
-import codepg.utils as utils
-from .config import Config
+
+# Fix relative imports
+from codepg import utils
+from codepg.config import Config
 
 def get_file_template(language: str, filename: str, folder_path: str) -> str:
     """

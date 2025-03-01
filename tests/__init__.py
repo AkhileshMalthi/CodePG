@@ -1,1 +1,1 @@
-# Empty file to make the tests directory a package
+"""Test suite for the CodePG package."""
