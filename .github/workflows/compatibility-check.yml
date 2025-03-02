@@ -1,0 +1,66 @@
+name: Compatibility Check
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ['3.8', '3.11']
+        include:
+          - os: ubuntu-latest
+            python-version: '3.8'
+            toxenv: py38
+          - os: ubuntu-latest
+            python-version: '3.11'
+            toxenv: py311
+          - os: windows-latest
+            python-version: '3.8'
+            toxenv: py38
+          - os: windows-latest
+            python-version: '3.11'
+            toxenv: py311
+          - os: macos-latest
+            python-version: '3.8'
+            toxenv: py38
+          - os: macos-latest
+            python-version: '3.11'
+            toxenv: py311
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install poetry
+        poetry install
+        
+    - name: Verify package installation
+      run: |
+        # Install the package
+        poetry install
+        
+        # Verify the command is available
+        poetry run codepg --help
+        
+        # Create a test file
+        if [ "$RUNNER_OS" == "Windows" ]; then
+          poetry run codepg create test_file.py --no-editor
+        else
+          poetry run codepg create test_file.py --no-editor
+        fi
+      shell: bash
