@@ -11,10 +11,11 @@ packages = [{include = "codepg"}]
 python = ">=3.10,<3.13"
 langchain = "^0.1.0"
 langchain-core = "^0.1.8"
-langchain-groq = "^0.1.0"
+langchain-groq = "^0.1.0"  # Keep only langchain-groq
 crewai = "^0.28.0"
 ollama = "^0.1.6"
 python-dotenv = "^1.0.0"
+groq = "^0.18.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=7.0.0"
