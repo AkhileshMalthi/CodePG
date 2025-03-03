@@ -13,7 +13,7 @@ load_dotenv()
 # Fix relative imports
 from codepg import utils
 from codepg.config import Config
-from codepg.ai.groq import GroqAI
+from codepg.ai.groq_ai import GroqAI
 from codepg.logger import setup_logger
 
 # Set up module logger

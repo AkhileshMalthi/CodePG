@@ -1,3 +1,3 @@
-from .generator import AI
-from .ollama import OllamaAI
-from .groq import GroqAI
+from .base_ai import AI
+from .ollama_ai import OllamaAI
+from .groq_ai import GroqAI
