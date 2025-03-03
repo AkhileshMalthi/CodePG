@@ -4,9 +4,9 @@ import yaml
 from pathlib import Path
 from langchain_groq import ChatGroq
 from langchain_core.messages import HumanMessage
-from .generator import Generator
+from codepg.ai import AI
 
-class GroqGenerator(Generator):
+class GroqAI(AI):
     def __init__(self):
         api_key = os.getenv("GROQ_API_KEY")
         if not api_key:
@@ -42,10 +42,10 @@ class GroqGenerator(Generator):
 
     def __str__(self):
         """Returns generator information"""
-        return "Groq Generator (Mixtral-8x7b)"
+        return "Groq AI (Mixtral-8x7b)"
     
 if __name__ == '__main__':
-    generator = GroqGenerator()
+    generator = GroqAI()
     response = generator.generate(
         programming_language="python",
         prompt="Write a function to calculate the factorial of a number"

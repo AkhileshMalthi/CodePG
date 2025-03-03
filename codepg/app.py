@@ -2,7 +2,7 @@ import argparse
 import os
 import datetime
 import subprocess
-from typing import Optional, Dict, Any
+from typing import Optional
 from pathlib import Path
 import sys
 from dotenv import load_dotenv
@@ -13,7 +13,7 @@ load_dotenv()
 # Fix relative imports
 from codepg import utils
 from codepg.config import Config
-from codepg.code_generators.groq import GroqGenerator
+from codepg.ai.groq import GroqAI
 from codepg.logger import setup_logger
 
 # Set up module logger
@@ -91,7 +91,7 @@ def create_file(filename: str, config: Config, prompt: Optional[str] = None) -> 
             logger.info(f"Generating code from prompt: {prompt[:50]}...")
             try:
                 # Initialize Groq generator
-                generator = GroqGenerator()
+                generator = GroqAI()
                 
                 # Get the language based on the extension
                 file_content = generator.generate(
