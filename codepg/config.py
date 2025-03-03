@@ -2,10 +2,18 @@ import os
 import json
 from typing import Optional, Dict, Any, List, Tuple
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables at the start
+load_dotenv()
 
 DEFAULT_CONFIG = {
     "base_dir": os.path.expanduser("~/CodePG"),
     "editor_command": "code \"{path}\"",
+    "ai_model_type": "groq",  # can be "groq" or "ollama"
+    "ai_model_name": None,    # default model will be used if not specified
+    "groq_api_key": "",       # Remove hardcoded key, will be loaded from environment
+    "use_crew_ai": False,     # whether to use CrewAI for more complex tasks
 }
 
 # Environment variable prefix for all configurable options

@@ -1,6 +1,10 @@
-# CodePG - Code Playground Generator
+# CodePG - Code PlayGround
 
 CodePG is a command-line tool that helps you organize and automate your coding practice by creating date-organized folders and files for various programming languages.
+
+## Requirements
+
+- Python 3.8.1 or higher
 
 ## Features
 
@@ -101,6 +105,46 @@ export CODEPG_EDITOR_COMMAND="vim \"{path}\""
 # Specify a config file to use
 export CODEPG_CONFIG_FILE="./my_config.json"
 ```
+
+## AI Code Generation
+
+CodePG can generate code using AI models based on a prompt:
+
+```bash
+# Generate Python code that creates a web server
+codepg create server.py --prompt "Create a simple HTTP server that serves files from the current directory"
+
+# Generate JavaScript code for a calculator
+codepg create calculator.js --prompt "Build a calculator with basic operations" 
+```
+
+### AI Configuration
+
+You can configure AI settings in your config file:
+
+```bash
+# Set the AI model to use
+codepg config --set ai_model_type groq  # Use Groq API (default)
+codepg config --set ai_model_type ollama  # Use local Ollama models
+
+# Set a specific model
+codepg config --set ai_model_name llama3-70b-8192  # For Groq
+codepg config --set ai_model_name llama3  # For Ollama
+
+# Use CrewAI for more complex tasks
+codepg config --set use_crew_ai true
+```
+
+### Environment Variables
+
+You can also set up API keys using environment variables:
+
+```bash
+# Set up Groq API key
+export GROQ_API_KEY="your-api-key-here"
+```
+
+Or add it to your `.env` file in the project directory.
 
 ## Supported Languages
 
