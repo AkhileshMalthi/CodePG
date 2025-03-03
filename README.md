@@ -1,4 +1,4 @@
-# CodePG - Code Playground Generator
+# CodePG - Code PlayGround
 
 CodePG is a command-line tool that helps you organize and automate your coding practice by creating date-organized folders and files for various programming languages.
 
