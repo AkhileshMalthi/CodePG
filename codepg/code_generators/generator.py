@@ -1,10 +1,9 @@
 from abc import ABC, abstractmethod
 
 class Generator(ABC):
-
     @abstractmethod
-    def generate(self, prompt):
-        """generates response for the prompt"""
+    def generate(self, programming_language: str, prompt: str) -> str:
+        """generates code in specified language based on the prompt"""
         pass
 
     @abstractmethod

@@ -13,7 +13,7 @@ load_dotenv()
 # Fix relative imports
 from codepg import utils
 from codepg.config import Config
-from codepg.ai_service import AICodeGenerator
+from codepg.code_generators.groq import GroqGenerator
 from codepg.logger import setup_logger
 
 # Set up module logger
@@ -90,29 +90,15 @@ def create_file(filename: str, config: Config, prompt: Optional[str] = None) -> 
         if prompt:
             logger.info(f"Generating code from prompt: {prompt[:50]}...")
             try:
-                # Get AI model settings from config
-                model_type = config.get('ai_model_type', 'groq')
-                model_name = config.get('ai_model_name', None)
-                api_key = config.get('groq_api_key', '') or os.environ.get('GROQ_API_KEY', '')
-                use_crew = config.get('use_crew_ai', False)
+                # Initialize Groq generator
+                generator = GroqGenerator()
                 
-                if model_type == 'groq' and not api_key:
-                    logger.error("No Groq API key found")
-                    print("Error: Groq API key not found. Please set it using one of the following methods:")
-                    print("1. Environment variable: export GROQ_API_KEY=your_key_here")
-                    print("2. Config file: codepg config --set groq_api_key your_key_here")
-                    return None
+                # Get the language based on the extension
+                file_content = generator.generate(
+                    programming_language=language,
+                    prompt=prompt
+                )
                 
-                # Generate code using AI
-                generator = AICodeGenerator(model_type=model_type, api_key=api_key, model_name=model_name)
-                file_content = generator.generate_code(language, prompt, use_crew=use_crew)
-                
-                # Check if the content indicates an error
-                if file_content.startswith("# Error:"):
-                    logger.error("Code generation failed")
-                    print(file_content)
-                    return None
-                    
                 logger.info("Code generated successfully")
                 print("Code generated successfully!")
             except ValueError as e:
