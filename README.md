@@ -18,7 +18,7 @@ CodePG is a command-line tool that helps you organize and automate your coding p
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/CodePG.git
+git clone https://github.com/AkhileshMalthi/CodePG.git
 
 # Navigate to the directory
 cd CodePG
