@@ -169,3 +169,35 @@ CodePG currently supports the following file extensions:
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+
+## Development
+
+### Setting up the development environment
+
+1. Clone the repository
+2. Install dependencies: `poetry install` 
+3. (Optional) Install pre-commit hooks: `make setup` or `python scripts/dev.py setup`
+4. Run tests: `poetry run pytest`
+5. Run linting and formatting: `poetry run ruff check` and `poetry run ruff format`
+
+> **Note**: If you get errors about ruff not being found, run `poetry lock && poetry install` to update the lock file and install ruff.
+
+### Code Quality Tools
+
+This project uses:
+- **Ruff**: For linting and code formatting (replaces flake8, black, and isort)
+- **MyPy**: For type checking
+- **Pytest**: For testing
+
+Run all checks:
+```bash
+# Lint and format code
+poetry run ruff check codepg/ tests/
+poetry run ruff format codepg/ tests/
+
+# Type checking
+poetry run mypy codepg/
+
+# Run tests
+poetry run pytest
+```
