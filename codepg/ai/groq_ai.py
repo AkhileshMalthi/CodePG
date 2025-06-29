@@ -1,53 +1,57 @@
 import os
 import re
-import yaml
 from pathlib import Path
-from langchain_groq import ChatGroq
-from langchain_core.messages import HumanMessage
+
+import yaml
+from groq import Groq
+
 from codepg.ai import AI
 
+
 class GroqAI(AI):
-    def __init__(self):
+    def __init__(self) -> None:
         api_key = os.getenv("GROQ_API_KEY")
         if not api_key:
             raise ValueError("GROQ_API_KEY environment variable is not set")
-        
-        self.chat = ChatGroq(
-            groq_api_key=api_key,
-            model_name="mixtral-8x7b-32768"  # Using Mixtral model
-        )
-        
+
+        self.client = Groq(api_key=api_key)
+        self.model_name = "mixtral-8x7b-32768"  # Using Mixtral model
+
         # Load prompt template
         prompt_path = Path(__file__).parent.parent / "prompts" / "code_generation.yaml"
-        with open(prompt_path, 'r') as f:
-            self.prompt_template = yaml.safe_load(f)['template']
+        with open(prompt_path) as f:
+            self.prompt_template = yaml.safe_load(f)["template"]
 
     def generate(self, programming_language: str, prompt: str) -> str:
         """Generates code in specified language based on the prompt"""
-        formatted_prompt = self.prompt_template.format(
-            language=programming_language,
-            prompt=prompt
-        )
-        
-        messages = [HumanMessage(content=formatted_prompt)]
-        response = self.chat.invoke(messages)
-        
-        # Extract code blocks using regex
-        code_blocks = re.findall(r'```(?:\w+)?\n(.*?)```', response.content, re.DOTALL)
-        
-        if code_blocks:
-            return code_blocks[0].strip()
-        else:
-            return response.content.strip()
+        formatted_prompt = self.prompt_template.format(language=programming_language, prompt=prompt)
 
-    def __str__(self):
+        response = self.client.chat.completions.create(
+            model=self.model_name,
+            messages=[{"role": "user", "content": formatted_prompt}],
+            temperature=0.1,
+            max_tokens=2048,
+        )
+
+        content = response.choices[0].message.content or ""
+
+        # Extract code blocks using regex
+        code_blocks = re.findall(r"```(?:\w+)?\n(.*?)```", content, re.DOTALL)
+
+        if code_blocks:
+            return str(code_blocks[0]).strip()
+        else:
+            return str(content).strip()
+
+    def __str__(self) -> str:
         """Returns generator information"""
-        return "Groq AI (Mixtral-8x7b)"
-    
-if __name__ == '__main__':
+        return f"Groq AI ({self.model_name})"
+
+
+if __name__ == "__main__":
     generator = GroqAI()
     response = generator.generate(
         programming_language="python",
-        prompt="Write a function to calculate the factorial of a number"
+        prompt="Write a function to calculate the factorial of a number",
     )
     print(response)

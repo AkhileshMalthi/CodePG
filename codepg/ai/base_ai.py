@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+
 class AI(ABC):
     @abstractmethod
     def generate(self, programming_language: str, prompt: str) -> str:
@@ -7,8 +8,6 @@ class AI(ABC):
         pass
 
     @abstractmethod
-    def __str__(self):
+    def __str__(self) -> str:
         """returns generator information"""
         pass
-
-
