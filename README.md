@@ -231,6 +231,25 @@ Tooling: `uv` for package management, `ruff` for lint and format (code style too
 4. Push: `git push origin feature/your-feature`
 5. Open a pull request
 
+## Releases
+
+CodePG uses Semantic Versioning (number system `MAJOR.MINOR.PATCH`) and Conventional Commits (commit format `type: description`).
+
+| Commit type | Version bump | Example |
+|---|---|---|
+| `fix: ...` | PATCH | `fix: handle slash in filename` -> `0.1.0` -> `0.1.1` |
+| `feat: ...` | MINOR | `feat: add lua template` -> `0.1.0` -> `0.2.0` |
+| `feat!:` or `BREAKING CHANGE:` | MAJOR | `feat!: change config format` -> `1.0.0` -> `2.0.0` |
+| `docs:`, `chore:`, `refactor:` | No release | No version change |
+
+Flow:
+
+1. You open a PR with `feat:`/`fix:` commits and merge to `main`.
+2. GitHub Actions runs `release.yml` on `main`, bumps `pyproject.toml:3` and `codepg/__init__.py:3`, updates `CHANGELOG.md`, creates tag `vX.Y.Z`, and publishes a GitHub Release with `dist/*` files (built via `uv build`).
+3. No manual `cz bump` (manual version bump) — CI does it. If you push only `docs:`/`chore:`, no release is made.
+
+Check the next version without releasing: `uv run semantic-release version --print`.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).

@@ -25,6 +25,7 @@ dev = [
     "mypy>=1.13.0",
     "pre-commit>=4.0.0",
     "types-python-dateutil",
+    "python-semantic-release>=9.15.0",
 ]
 
 [tool.pytest.ini_options]
@@ -68,3 +69,21 @@ warn_unused_configs = true
 disallow_untyped_defs = true
 disallow_incomplete_defs = true
 exclude = ["tests"]
+
+[tool.semantic_release]
+# Branches that trigger releases (only main)
+branches.main = { match = "main", prerelease = false }
+# Files where version is stored — keep in sync
+version_toml = ["pyproject.toml:project.version"]
+version_variables = ["codepg/__init__.py:__version__"]
+# Commit parsing and versioning
+commit_parser = "conventional"
+major_on_zero = false
+allow_zero_version = true
+# Changelog and tag format
+changelog_file = "CHANGELOG.md"
+tag_format = "v{version}"
+# Build before publish (creates dist/* with uv)
+build_command = "uv build"
+# Publish to GitHub Releases only (no PyPI until you add PYPI token)
+publish.distributions = false
