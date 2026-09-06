@@ -1,23 +1,31 @@
 import argparse
 import datetime
-import os
+import re
+import shlex
 import subprocess
 import sys
 from pathlib import Path
 from typing import Any
 
-from dotenv import load_dotenv
-
 from codepg import utils
-from codepg.ai.groq_ai import GroqAI
 from codepg.config import Config
 from codepg.logger import setup_logger
 
-# Load environment variables from .env file
-load_dotenv()
-
 # Set up module logger
 logger = setup_logger(__name__)
+
+
+def _sanitize_java_class(name: str) -> str:
+    """Sanitize filename stem into a valid Java class name."""
+    stem = name.strip()
+    # Replace invalid chars with underscore, ensure starts with letter/underscore
+    sanitized = re.sub(r"[^A-Za-z0-9_]", "_", stem)
+    if not sanitized:
+        sanitized = "Main"
+    if sanitized[0].isdigit():
+        sanitized = f"_{sanitized}"
+    # Capitalize first letter
+    return sanitized[0].upper() + sanitized[1:] if len(sanitized) > 1 else sanitized.upper()
 
 
 def get_file_template(language: str, filename: str, folder_path: str) -> str:
@@ -32,31 +40,57 @@ def get_file_template(language: str, filename: str, folder_path: str) -> str:
     Returns:
         str: The template string for the file
     """
+    today = datetime.date.today()
+    java_class = _sanitize_java_class(Path(filename).stem)
     templates = {
-        "python": f"# {filename}\n# Created: {datetime.date.today()}\n\n\ndef main():\n    pass\n\n\nif __name__ == '__main__':\n    main()\n",
-        "javascript": f"// {filename}\n// Created: {datetime.date.today()}\n\nfunction main() {{\n    \n}}\n\nmain();\n",
-        "typescript": f"// {filename}\n// Created: {datetime.date.today()}\n\nfunction main(): void {{\n    \n}}\n\nmain();\n",
-        "rust": f'// {filename}\n// Created: {datetime.date.today()}\n\nfn main() {{\n    println!("Hello, world!");\n}}\n',
-        "go": f'// {filename}\n// Created: {datetime.date.today()}\n\npackage main\n\nimport "fmt"\n\nfunc main() {{\n    fmt.Println("Hello, world!")\n}}\n',
-        "java": f'// {filename}\n// Created: {datetime.date.today()}\n\npublic class {os.path.splitext(filename)[0]} {{\n    public static void main(String[] args) {{\n        System.out.println("Hello, world!");\n    }}\n}}\n',
+        "python": f"# {filename}\n# Created: {today}\n\n\ndef main():\n    pass\n\n\nif __name__ == '__main__':\n    main()\n",
+        "javascript": f"// {filename}\n// Created: {today}\n\nfunction main() {{\n    \n}}\n\nmain();\n",
+        "typescript": f"// {filename}\n// Created: {today}\n\nfunction main(): void {{\n    \n}}\n\nmain();\n",
+        "rust": f'// {filename}\n// Created: {today}\n\nfn main() {{\n    println!("Hello, world!");\n}}\n',
+        "go": f'// {filename}\n// Created: {today}\n\npackage main\n\nimport "fmt"\n\nfunc main() {{\n    fmt.Println("Hello, world!")\n}}\n',
+        "java": f'// {filename}\n// Created: {today}\n\npublic class {java_class} {{\n    public static void main(String[] args) {{\n        System.out.println("Hello, world!");\n    }}\n}}\n',
+        "c": f'// {filename}\n// Created: {today}\n\n#include <stdio.h>\n\nint main() {{\n    printf("Hello, world!\\n");\n    return 0;\n}}\n',
+        "cpp": f'// {filename}\n// Created: {today}\n\n#include <iostream>\n\nint main() {{\n    std::cout << "Hello, world!" << std::endl;\n    return 0;\n}}\n',
+        "html": f"<!-- {filename} -->\n<!-- Created: {today} -->\n\n<!DOCTYPE html>\n<html>\n<head>\n    <title>{filename}</title>\n</head>\n<body>\n    <h1>Hello, world!</h1>\n</body>\n</html>\n",
+        "css": f"/* {filename} */\n/* Created: {today} */\n\nbody {{\n    margin: 0;\n    padding: 0;\n}}\n",
+        "shell": f'# {filename}\n# Created: {today}\n\n#!/bin/bash\n\necho "Hello, world!"\n',
+        "sql": f"-- {filename}\n-- Created: {today}\n\nSELECT 'Hello, world!';\n",
+        "ruby": f"# {filename}\n# Created: {today}\n\ndef main\n  puts 'Hello, world!'\nend\n\nmain\n",
+        "php": f'<?php\n// {filename}\n// Created: {today}\n\necho "Hello, world!";\n',
+        "csharp": f'// {filename}\n// Created: {today}\n\nusing System;\n\nclass Program {{\n    static void Main() {{\n        Console.WriteLine("Hello, world!");\n    }}\n}}\n',
+        "swift": f'// {filename}\n// Created: {today}\n\nimport Foundation\n\nprint("Hello, world!")\n',
+        "kotlin": f'// {filename}\n// Created: {today}\n\nfun main() {{\n    println("Hello, world!")\n}}\n',
+        "dart": f"// {filename}\n// Created: {today}\n\nvoid main() {{\n  print('Hello, world!');\n}}\n",
+        "lua": f'-- {filename}\n-- Created: {today}\n\nprint("Hello, world!")\n',
+        "r": f'# {filename}\n# Created: {today}\n\nprint("Hello, world!")\n',
     }
 
     return templates.get(language.lower(), f"# {filename} created in {folder_path}\n")
 
 
-def create_file(filename: str, config: Config, prompt: str | None = None) -> str | None:
+def create_file(filename: str, config: Config) -> str | None:
     """
     Create a new file for the specified programming language in a date-specific folder.
 
     Parameters:
         filename (str): The name of the file to be created (including extension).
         config (Config): Configuration object with settings.
-        prompt (Optional[str]): If provided, generate code based on this prompt.
 
     Returns:
         Optional[str]: Path to the created file or None if creation failed.
     """
     try:
+        # Validate filename does not contain path traversal
+        if (
+            Path(filename).name != filename
+            or ".." in filename
+            or "/" in filename
+            or "\\" in filename
+        ):
+            logger.error(f"Invalid filename: {filename}")
+            print(f"Error: Invalid filename: {filename}")
+            return None
+
         # Extract the file extension
         extension = Path(filename).suffix.lower()
         logger.info(f"Creating file: {filename}")
@@ -86,34 +120,12 @@ def create_file(filename: str, config: Config, prompt: str | None = None) -> str
         # Construct the full file path
         file_path = today_folder / filename
 
-        # Generate content based on prompt or use template
-        file_content = ""
-        if prompt:
-            logger.info(f"Generating code from prompt: {prompt[:50]}...")
-            try:
-                # Initialize Groq generator
-                generator = GroqAI()
-
-                # Get the language based on the extension
-                file_content = generator.generate(programming_language=language, prompt=prompt)
-
-                logger.info("Code generated successfully")
-                print("Code generated successfully!")
-            except ValueError as e:
-                logger.error(f"Error: {str(e)}")
-                print(f"Error: {str(e)}")
-                return None
-            except Exception as e:
-                logger.error(f"Error generating code: {e}")
-                print(f"Error generating code: {e}")
-                print("Falling back to template...")
-                file_content = get_file_template(language, filename, str(today_folder))
-        else:
-            file_content = get_file_template(language, filename, str(today_folder))
+        # Generate content from template
+        file_content = get_file_template(language, filename, str(today_folder))
 
         # Create the file if it does not exist, or if forced
         if not file_path.exists():
-            with open(file_path, "w") as file:
+            with open(file_path, "w", encoding="utf-8") as file:
                 file.write(file_content)
             logger.info(f"Created file: {file_path}")
             print(f"Created file: {file_path}")
@@ -149,17 +161,25 @@ def open_in_editor(path: str, config: Config) -> bool:
         print("No editor command configured. Skipping editor launch.")
         return False
 
+    # Validate path does not contain shell injection chars when formatted
     try:
-        # Format the command with the path
-        cmd = editor_cmd.format(path=path)
-        subprocess.run(cmd, shell=True, check=True)
+        # If editor_command contains {path}, replace with quoted path and split
+        if "{path}" in editor_cmd:
+            # Split command safely: format then shlex.split, no shell
+            cmd_str = editor_cmd.format(path=path)
+            # Use shlex.split without shell; pass as list
+            cmd_parts = shlex.split(cmd_str)
+        else:
+            cmd_parts = shlex.split(editor_cmd) + [path]
+
+        subprocess.run(cmd_parts, shell=False, check=True)
         return True
     except subprocess.CalledProcessError as e:
         logger.error(
-            f"Failed to open editor. Command '{cmd}' returned non-zero exit status {e.returncode}"
+            f"Failed to open editor. Command '{editor_cmd}' returned non-zero exit status {e.returncode}"
         )
         print(
-            f"Failed to open editor. Command '{cmd}' returned non-zero exit status {e.returncode}"
+            f"Failed to open editor. Command '{editor_cmd}' returned non-zero exit status {e.returncode}"
         )
         return False
     except Exception as e:
@@ -194,9 +214,6 @@ def main() -> int:
     create_parser.add_argument(
         "--no-editor", action="store_true", help="Don't open the editor after creating the file."
     )
-    create_parser.add_argument(
-        "--prompt", "-p", type=str, help="Generate code using this prompt with AI."
-    )
 
     # Config command
     config_parser = subparsers.add_parser("config", help="Manage configuration")
@@ -219,7 +236,6 @@ def main() -> int:
         args.filename = unknown[0]
         args.config = None
         args.no_editor = False
-        args.prompt = None
 
         if len(unknown) > 1:
             for i, arg in enumerate(unknown[1:], 1):
@@ -228,9 +244,6 @@ def main() -> int:
                 elif arg == "--config" or arg == "-c":
                     if i + 1 < len(unknown):
                         args.config = unknown[i + 1]
-                elif arg == "--prompt" or arg == "-p":
-                    if i + 1 < len(unknown):
-                        args.prompt = unknown[i + 1]
 
     # If no command was provided explicitly or implicitly, show help
     if not args.command:
@@ -245,8 +258,6 @@ def main() -> int:
     # Handle file creation (the default command)
     if args.command == "create":
         logger.info(f"Creating file: {args.filename}")
-        if args.prompt:
-            logger.info(f"Using prompt: {args.prompt[:50]}...")
         # Load configuration
         try:
             config = Config(config_path=args.config)
@@ -255,8 +266,8 @@ def main() -> int:
             print(f"Error loading configuration: {e}")
             return 1
 
-        # Call create_file function with the parsed filename and prompt if provided
-        created_path = create_file(args.filename, config, prompt=args.prompt)
+        # Call create_file function with the parsed filename
+        created_path = create_file(args.filename, config)
         if not created_path:
             return 1
 
@@ -370,15 +381,19 @@ def open_file_in_editor(file_path: str, editor_cmd: str) -> bool:
         bool: True if successful, False otherwise.
     """
     try:
-        cmd = editor_cmd.format(path=file_path)
-        subprocess.run(cmd, shell=True, check=True)
+        if "{path}" in editor_cmd:
+            cmd_str = editor_cmd.format(path=file_path)
+            cmd_parts = shlex.split(cmd_str)
+        else:
+            cmd_parts = shlex.split(editor_cmd) + [file_path]
+        subprocess.run(cmd_parts, shell=False, check=True)
         return True
     except subprocess.CalledProcessError as e:
         logger.error(
-            f"Failed to open editor. Command '{cmd}' returned non-zero exit status {e.returncode}"
+            f"Failed to open editor. Command '{editor_cmd}' returned non-zero exit status {e.returncode}"
         )
         print(
-            f"Failed to open editor. Command '{cmd}' returned non-zero exit status {e.returncode}"
+            f"Failed to open editor. Command '{editor_cmd}' returned non-zero exit status {e.returncode}"
         )
         return False
     except Exception as e:

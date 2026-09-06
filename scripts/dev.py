@@ -1,5 +1,5 @@
 # Development task runner script for CodePG
-# Run with: python scripts/dev.py <command>
+# Run with: uv run python scripts/dev.py <command>  or  python scripts/dev.py <command>
 
 import subprocess
 import sys
@@ -31,34 +31,34 @@ def main() -> int:
     command = sys.argv[1]
 
     if command == "lint":
-        return run_command(["poetry", "run", "ruff", "check", "codepg/", "tests/"], "Ruff linting")
+        return run_command(["uv", "run", "ruff", "check", "codepg/", "tests/"], "Ruff linting")
 
     elif command == "format":
         return run_command(
-            ["poetry", "run", "ruff", "format", "codepg/", "tests/"], "Ruff formatting"
+            ["uv", "run", "ruff", "format", "codepg/", "tests/"], "Ruff formatting"
         )
 
     elif command == "check":
         lint_code = run_command(
-            ["poetry", "run", "ruff", "check", "codepg/", "tests/"], "Ruff linting"
+            ["uv", "run", "ruff", "check", "codepg/", "tests/"], "Ruff linting"
         )
         format_code = run_command(
-            ["poetry", "run", "ruff", "format", "codepg/", "tests/"], "Ruff formatting"
+            ["uv", "run", "ruff", "format", "codepg/", "tests/"], "Ruff formatting"
         )
         return max(lint_code, format_code)
 
     elif command == "type-check":
-        return run_command(["poetry", "run", "mypy", "codepg/"], "MyPy type checking")
+        return run_command(["uv", "run", "mypy", "codepg/"], "MyPy type checking")
 
     elif command == "test":
-        return run_command(["poetry", "run", "pytest"], "Running tests")
+        return run_command(["uv", "run", "pytest"], "Running tests")
 
     elif command == "all":
         commands = [
-            (["poetry", "run", "ruff", "check", "codepg/", "tests/"], "Ruff linting"),
-            (["poetry", "run", "ruff", "format", "codepg/", "tests/"], "Ruff formatting"),
-            (["poetry", "run", "mypy", "codepg/"], "MyPy type checking"),
-            (["poetry", "run", "pytest"], "Running tests"),
+            (["uv", "run", "ruff", "check", "codepg/", "tests/"], "Ruff linting"),
+            (["uv", "run", "ruff", "format", "codepg/", "tests/"], "Ruff formatting"),
+            (["uv", "run", "mypy", "codepg/"], "MyPy type checking"),
+            (["uv", "run", "pytest"], "Running tests"),
         ]
 
         exit_codes = []
@@ -68,7 +68,7 @@ def main() -> int:
         return max(exit_codes)
 
     elif command == "setup":
-        return run_command(["pre-commit", "install"], "Setting up pre-commit hooks")
+        return run_command(["uv", "run", "pre-commit", "install"], "Setting up pre-commit hooks")
 
     else:
         print(f"Unknown command: {command}")

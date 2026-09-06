@@ -14,48 +14,42 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        
+
     steps:
-    - uses: actions/checkout@v3
-    
+    - uses: actions/checkout@v4
+
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
-        python-version: '3.11'
-        
-    - name: Install Poetry
-      uses: snok/install-poetry@v1
+        python-version: '3.12'
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
       with:
-        virtualenvs-create: true
-        virtualenvs-in-project: true
-        
+        enable-cache: true
+
     - name: Install package
-      run: |
-        poetry install --no-interaction
-        
+      run: uv sync --group dev
+
     - name: Run integration tests
       run: |
-        # Create a test directory
         mkdir -p integration_test
         cd integration_test
-        
-        # Test basic usage
-        poetry run codepg create test_file.py --no-editor
-        
-        # Test config commands
-        poetry run codepg config --init
-        poetry run codepg config --show
-        
-        # Verify files were created correctly
+
+        uv run codepg create test_file.py --no-editor
+
+        uv run codepg config --init
+        uv run codepg config --show
+
         if [ "$RUNNER_OS" == "Windows" ]; then
-          PYPATH=$(Get-ChildItem -Path "$HOME\CodePG" -Recurse -Include "test_file.py" | Select-Object -First 1 -ExpandProperty FullName)
-          if (-not $PYPATH) {
+          PYPATH=$(find "$HOME/CodePG" -name "test_file.py" | head -n 1)
+          if [ -z "$PYPATH" ]; then
             echo "Failed to create test file"
             exit 1
-          } else {
+          else
             echo "Successfully created: $PYPATH"
-            Get-Content "$PYPATH"
-          }
+            cat "$PYPATH"
+          fi
         else
           PYPATH=$(find $HOME/CodePG -name "test_file.py" | head -n 1)
           if [ -z "$PYPATH" ]; then
@@ -64,6 +58,6 @@ jobs:
           else
             echo "Successfully created: $PYPATH"
             cat "$PYPATH"
-          }
+          fi
         fi
       shell: bash

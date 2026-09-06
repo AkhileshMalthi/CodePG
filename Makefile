@@ -1,8 +1,9 @@
-.PHONY: help lint format check type-check test all install setup
+.PHONY: help lint format check type-check test all install setup sync
 
 help:
 	@echo "Available commands:"
-	@echo "  install     - Install dependencies"
+	@echo "  sync        - Install dependencies with uv"
+	@echo "  install     - Alias for sync"
 	@echo "  lint        - Run ruff linting"
 	@echo "  format      - Run ruff formatting"
 	@echo "  check       - Run both linting and formatting"
@@ -11,24 +12,26 @@ help:
 	@echo "  all         - Run all checks"
 	@echo "  setup       - Setup pre-commit hooks"
 
-install:
-	poetry install
+sync:
+	uv sync --group dev
+
+install: sync
 
 lint:
-	poetry run ruff check codepg/ tests/
+	uv run ruff check codepg/ tests/
 
 format:
-	poetry run ruff format codepg/ tests/
+	uv run ruff format codepg/ tests/
 
 check: lint format
 
 type-check:
-	poetry run mypy codepg/
+	uv run mypy codepg/
 
 test:
-	poetry run pytest
+	uv run pytest
 
 all: check type-check test
 
 setup:
-	pre-commit install
+	uv run pre-commit install

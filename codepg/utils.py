@@ -91,20 +91,6 @@ def is_command_available(cmd: str) -> bool:
     Returns:
         bool: True if the command is available, False otherwise.
     """
-    try:
-        from shutil import which
+    from shutil import which
 
-        return which(cmd) is not None
-    except ImportError:
-        # Fallback method for older Python versions
-        import subprocess
-
-        try:
-            devnull = open(os.devnull, "w")
-            if platform.system().lower() == "windows":
-                subprocess.check_call(f"where {cmd}", stdout=devnull, stderr=devnull, shell=True)
-            else:
-                subprocess.check_call(f"which {cmd}", stdout=devnull, stderr=devnull, shell=True)
-            return True
-        except subprocess.CalledProcessError:
-            return False
+    return which(cmd) is not None

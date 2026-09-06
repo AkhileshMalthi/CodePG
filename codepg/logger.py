@@ -1,3 +1,4 @@
+import copy
 import logging
 import sys
 from datetime import datetime
@@ -16,15 +17,18 @@ class ColoredFormatter(logging.Formatter):
     }
 
     def format(self, record: logging.LogRecord) -> str:
-        # Add color to level name
-        levelname = record.levelname
+        # Copy record to avoid mutating original (fixes handler chain corruption)
+        record_copy = copy.copy(record)
+        levelname = record_copy.levelname
         if levelname in self.COLORS:
-            record.levelname = f"{self.COLORS[levelname]}{levelname}{self.COLORS['RESET']}"
+            record_copy.levelname = f"{self.COLORS[levelname]}{levelname}{self.COLORS['RESET']}"
 
         # Add timestamp
-        record.timestamp = datetime.fromtimestamp(record.created).strftime("%Y-%m-%d %H:%M:%S")
+        record_copy.timestamp = datetime.fromtimestamp(record_copy.created).strftime(  # type: ignore[attr-defined]
+            "%Y-%m-%d %H:%M:%S"
+        )
 
-        return super().format(record)
+        return super().format(record_copy)
 
 
 def setup_logger(name: str, level: str | None = None) -> logging.Logger:

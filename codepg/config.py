@@ -3,16 +3,9 @@ import os
 from pathlib import Path
 from typing import Any
 
-from dotenv import load_dotenv
-
-# Load environment variables at the start
-load_dotenv()
-
 DEFAULT_CONFIG = {
     "base_dir": os.path.expanduser("~/CodePG"),
     "editor_command": 'code "{path}"',
-    "ai_model_type": "groq",  # can be "groq" or "ollama"
-    "ai_model_name": None,  # default model will be used if not specified
 }
 
 # Environment variable prefix for all configurable options

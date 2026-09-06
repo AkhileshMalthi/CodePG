@@ -1,96 +1,97 @@
 # CodePG - Code PlayGround
 
-A simple, fast command-line tool that helps organize your coding practice by creating date-organized folders and files for various programming languages.
+A simple, fast command-line tool (CLI) that helps organize your coding practice by creating date-organized folders and files for various programming languages.
 
-## ✨ Features
+## Features
 
-- 🗂️ **Organized Structure**: Creates language-specific folders organized by date
-- ⚡ **Quick Setup**: One command to create and open files
-- 🧠 **AI-Powered**: Generate code snippets using AI (Groq, Ollama)
-- 🔧 **Configurable**: Customize editor, directories, and AI settings
-- 🌍 **Cross-Platform**: Works on Windows, macOS, and Linux
-- 📝 **20+ Languages**: Support for Python, JavaScript, TypeScript, Rust, Go, and more
+- **Organized Structure**: Creates language-specific folders organized by date
+- **Quick Setup**: One command to create and open files
+- **Configurable**: Customize editor and directories
+- **Cross-Platform**: Works on Windows, macOS, and Linux
+- **20+ Languages**: Support for Python, JavaScript, TypeScript, Rust, Go, and more
+- **Docker Ready**: Run via Docker or Dev Container
 
-## 🚀 Quick Start
+## Quick Start
 
-### Installation
+### Installation with uv (recommended)
 
 ```bash
 # Clone the repository
 git clone https://github.com/yourusername/CodePG.git
 cd CodePG
 
-# Install with poetry (recommended)
-poetry install
-poetry shell
+# Install uv if you don't have it: https://docs.astral.sh/uv/getting-started/installation/
+# Then sync dependencies
+uv sync --group dev
 
-# Or install with pip
+# Run any command with uv run
+uv run codepg --help
+```
+
+### Installation with pip
+
+```bash
 pip install -e .
+```
+
+### Docker
+
+```bash
+# Build and run
+docker build -t codepg .
+docker run --rm -v "$HOME/CodePG:/playgrounds" codepg create hello.py --no-editor
+# Or use the image interactively
+docker run -it --rm codepg --help
 ```
 
 ### Basic Usage
 
 ```bash
 # Create a Python file
-codepg create hello.py
-
-# Create with AI-generated content
-codepg create server.py --prompt "Create a simple HTTP server"
+uv run codepg create hello.py
 
 # View configuration
-codepg config --show
+uv run codepg config --show
 
 # Set your preferred editor
-codepg config --set editor_command "code \"{path}\""
+uv run codepg config --set editor_command "code \"{path}\""
 ```
 
-## 📖 Usage Examples
+## Usage Examples
 
 ### Creating Files
 
 ```bash
 # Basic file creation
-codepg create calculator.py
-codepg create app.js
-codepg create main.rs
+uv run codepg create calculator.py
+uv run codepg create app.js
+uv run codepg create main.rs
 
 # Skip opening editor
-codepg create test.py --no-editor
+uv run codepg create test.py --no-editor
 
-# Generate code with AI
-codepg create fibonacci.py --prompt "Create a function to calculate fibonacci numbers"
+# With custom config
+uv run codepg create hello.py --config /path/to/config.json
 ```
 
 ### Configuration Management
 
 ```bash
 # Initialize default config
-codepg config --init
+uv run codepg config --init
 
 # Show current settings
-codepg config --show
+uv run codepg config --show
 
 # Customize settings
-codepg config --set base_dir "D:/MyCodePlaygrounds"
-codepg config --set editor_command "nvim \"{path}\""
+uv run codepg config --set base_dir "D:/MyCodePlaygrounds"
+uv run codepg config --set editor_command "nvim \"{path}\""
 
 # Edit config file directly
-codepg config --edit
+uv run codepg config --edit
 ```
 
-### AI Code Generation
-
-Set up your API key:
-```bash
-# For Groq (default)
-export GROQ_API_KEY="your-groq-api-key"
-
-# Configure AI settings
-codepg config --set ai_model_type groq
-codepg config --set ai_model_name "mixtral-8x7b-32768"
-```
-
-## ⚙️ Configuration
+## Configuration
 
 CodePG looks for configuration in this order:
 1. `--config` argument path
@@ -105,8 +106,6 @@ CodePG looks for configuration in this order:
 |--------|-------------|---------|
 | `base_dir` | Base directory for playgrounds | `~/CodePG` |
 | `editor_command` | Command to open editor | `code "{path}"` |
-| `ai_model_type` | AI provider (`groq` or `ollama`) | `groq` |
-| `ai_model_name` | Specific model name | `null` (uses default) |
 
 ### Environment Variables
 
@@ -114,10 +113,9 @@ Override any setting with environment variables:
 ```bash
 export CODEPG_BASE_DIR="/path/to/playgrounds"
 export CODEPG_EDITOR_COMMAND="vim \"{path}\""
-export CODEPG_AI_MODEL_TYPE="ollama"
 ```
 
-## 🔧 Supported Languages
+## Supported Languages
 
 | Extension | Language | Extension | Language |
 |-----------|----------|-----------|----------|
@@ -130,8 +128,10 @@ export CODEPG_AI_MODEL_TYPE="ollama"
 | `.cpp` | C++ | `.swift` | Swift |
 | `.sh` | Shell | `.kt` | Kotlin |
 | `.sql` | SQL | `.dart` | Dart |
+| `.h` | C Header | `.lua` | Lua |
+| `.hpp` | C++ Header | `.r` | R |
 
-## 📁 Directory Structure
+## Directory Structure
 
 CodePG organizes your files like this:
 ```
@@ -150,7 +150,7 @@ CodePG organizes your files like this:
         └── main.rs
 ```
 
-## 🛠️ Development
+## Development
 
 ### Setup Development Environment
 
@@ -158,38 +158,40 @@ CodePG organizes your files like this:
 # Clone and install
 git clone https://github.com/yourusername/CodePG.git
 cd CodePG
-poetry install
-poetry shell
+uv sync --group dev
 
 # Install pre-commit hooks
-pre-commit install
+uv run pre-commit install
 
 # Run tests
-pytest
+uv run pytest
 
 # Check code quality
-ruff check codepg/
-ruff format codepg/
-mypy codepg/
+uv run ruff check codepg/ tests/
+uv run ruff format codepg/ tests/
+uv run mypy codepg/
+
+# Or use the task runner
+uv run python scripts/dev.py all
+make all
 ```
+
+### Dev Container (VS Code)
+
+Open the folder in VS Code and choose "Reopen in Container" when prompted. The container installs `uv` and syncs deps automatically.
 
 ### Project Structure
 
 ```
 codepg/
-├── __init__.py
-├── app.py          # Main CLI application
-├── config.py       # Configuration management
-├── utils.py        # Utility functions
-├── logger.py       # Logging setup
-└── ai/
-    ├── __init__.py
-    ├── base_ai.py   # AI interface
-    ├── groq_ai.py   # Groq integration
-    └── ollama_ai.py # Ollama integration
+├── __init__.py       # Version (from importlib.metadata)
+├── app.py            # Main CLI application
+├── config.py         # Configuration management
+├── utils.py          # Utility functions
+└── logger.py         # Logging setup
 ```
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
@@ -199,12 +201,11 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
-- Built with Python and modern tooling
-- AI integration powered by Groq and Ollama
+- Built with Python and modern tooling (uv, Ruff, MyPy)
 - Code quality ensured by Ruff and MyPy
