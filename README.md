@@ -1,171 +1,211 @@
 # CodePG - Code PlayGround
 
-CodePG is a command-line tool that helps you organize and automate your coding practice by creating date-organized folders and files for various programming languages.
-
-## Requirements
-
-- Python 3.8.1 or higher
+A simple, fast command-line tool (CLI) that helps organize your coding practice by creating date-organized folders and files for various programming languages.
 
 ## Features
 
-- Creates organized folders by language and date
-- Automatically opens your preferred editor
-- Supports multiple programming languages
-- Configurable through a JSON configuration file
-- Includes language-specific file templates
+- **Organized Structure**: Creates language-specific folders organized by date
+- **Quick Setup**: One command to create and open files
+- **Configurable**: Customize editor and directories
+- **Cross-Platform**: Works on Windows, macOS, and Linux
+- **20+ Languages**: Support for Python, JavaScript, TypeScript, Rust, Go, and more
+- **Docker Ready**: Run via Docker or Dev Container
 
-## Installation
+## Quick Start
+
+### Installation with uv (recommended)
 
 ```bash
 # Clone the repository
 git clone https://github.com/AkhileshMalthi/CodePG.git
-
-# Navigate to the directory
 cd CodePG
 
-# Install the package
+# Install uv if you don't have it: https://docs.astral.sh/uv/getting-started/installation/
+# Then sync dependencies
+uv sync --group dev
+
+# Run any command with uv run
+uv run codepg --help
+```
+
+### Installation with pip
+
+```bash
 pip install -e .
 ```
 
-## Usage
+### Docker
+
+```bash
+# Build and run
+docker build -t codepg .
+docker run --rm -v "$HOME/CodePG:/playgrounds" codepg create hello.py --no-editor
+# Or use the image interactively
+docker run -it --rm codepg --help
+```
+
+### Basic Usage
+
+```bash
+# Create a Python file
+uv run codepg create hello.py
+
+# View configuration
+uv run codepg config --show
+
+# Set your preferred editor
+uv run codepg config --set editor_command "code \"{path}\""
+```
+
+## Usage Examples
 
 ### Creating Files
 
 ```bash
-# Create a Python file
-codepg create hello.py
+# Basic file creation
+uv run codepg create calculator.py
+uv run codepg create app.js
+uv run codepg create main.rs
 
-# For backward compatibility, you can omit the 'create' command
-codepg hello.py
+# Skip opening editor
+uv run codepg create test.py --no-editor
 
-# Create a JavaScript file with a custom config
-codepg create script.js --config ./my_config.json
-
-# Create a file without opening an editor
-codepg create test.py --no-editor
+# With custom config
+uv run codepg create hello.py --config /path/to/config.json
 ```
 
-### Managing Configuration
+### Configuration Management
 
 ```bash
-# Create a default configuration file
-codepg config --init
+# Initialize default config
+uv run codepg config --init
 
-# Create and immediately open the configuration file in your editor
-codepg config --init --edit
+# Show current settings
+uv run codepg config --show
 
-# View your current configuration
-codepg config --show
+# Customize settings
+uv run codepg config --set base_dir "D:/MyCodePlaygrounds"
+uv run codepg config --set editor_command "nvim \"{path}\""
 
-# Set a configuration option
-codepg config --set base_dir "D:/CodePlaygrounds"
-codepg config --set editor_command "sublime \"{path}\""
-
-# Edit your configuration in your default editor
-codepg config --edit
-
-# Specify a custom configuration file
-codepg config --file "./custom_config.json" --show
+# Edit config file directly
+uv run codepg config --edit
 ```
 
 ## Configuration
 
-### Configuration Locations
-
-CodePG looks for configuration in the following locations (in order):
-
-1. Path specified with `--config` argument or `--file` for config commands
-2. Path in environment variable `CODEPG_CONFIG_FILE`
-3. `./codepg_config.json` (in the current directory)
+CodePG looks for configuration in this order:
+1. `--config` argument path
+2. `CODEPG_CONFIG_FILE` environment variable
+3. `./codepg_config.json` (current directory)
 4. `~/.config/codepg/config.json`
 5. `~/.codepg.json`
 
 ### Configuration Options
 
-Example configuration:
-
-```json
-{
-    "base_dir": "D:/CodePlaygrounds",
-    "editor_command": "code \"{path}\""
-}
-```
+| Option | Description | Default |
+|--------|-------------|---------|
+| `base_dir` | Base directory for playgrounds | `~/CodePG` |
+| `editor_command` | Command to open editor | `code "{path}"` |
 
 ### Environment Variables
 
-You can also use environment variables to override configuration:
-
+Override any setting with environment variables:
 ```bash
-# Set the base directory for code playgrounds
-export CODEPG_BASE_DIR="D:/CodePlaygrounds"
-
-# Set the editor command
+export CODEPG_BASE_DIR="/path/to/playgrounds"
 export CODEPG_EDITOR_COMMAND="vim \"{path}\""
-
-# Specify a config file to use
-export CODEPG_CONFIG_FILE="./my_config.json"
 ```
-
-## AI Code Generation
-
-CodePG can generate code using AI models based on a prompt:
-
-```bash
-# Generate Python code that creates a web server
-codepg create server.py --prompt "Create a simple HTTP server that serves files from the current directory"
-
-# Generate JavaScript code for a calculator
-codepg create calculator.js --prompt "Build a calculator with basic operations" 
-```
-
-### AI Configuration
-
-You can configure AI settings in your config file:
-
-```bash
-# Set the AI model to use
-codepg config --set ai_model_type groq  # Use Groq API (default)
-codepg config --set ai_model_type ollama  # Use local Ollama models
-
-# Set a specific model
-codepg config --set ai_model_name llama3-70b-8192  # For Groq
-codepg config --set ai_model_name llama3  # For Ollama
-
-# Use CrewAI for more complex tasks
-codepg config --set use_crew_ai true
-```
-
-### Environment Variables
-
-You can also set up API keys using environment variables:
-
-```bash
-# Set up Groq API key
-export GROQ_API_KEY="your-api-key-here"
-```
-
-Or add it to your `.env` file in the project directory.
 
 ## Supported Languages
 
-CodePG currently supports the following file extensions:
+| Extension | Language | Extension | Language |
+|-----------|----------|-----------|----------|
+| `.py` | Python | `.go` | Go |
+| `.js` | JavaScript | `.rs` | Rust |
+| `.ts` | TypeScript | `.java` | Java |
+| `.html` | HTML | `.cs` | C# |
+| `.css` | CSS | `.php` | PHP |
+| `.c` | C | `.rb` | Ruby |
+| `.cpp` | C++ | `.swift` | Swift |
+| `.sh` | Shell | `.kt` | Kotlin |
+| `.sql` | SQL | `.dart` | Dart |
+| `.h` | C Header | `.lua` | Lua |
+| `.hpp` | C++ Header | `.r` | R |
 
-- Python (.py)
-- JavaScript (.js)
-- TypeScript (.ts)
-- HTML (.html)
-- CSS (.css)
-- Go (.go)
-- Rust (.rs)
-- C (.c, .h)
-- C++ (.cpp, .hpp)
-- Java (.java)
-- C# (.cs)
-- PHP (.php)
-- Ruby (.rb)
-- Shell (.sh)
-- And many more!
+## Directory Structure
+
+CodePG organizes your files like this:
+```
+~/CodePG/
+├── python-playground/
+│   ├── 2025-06-29/
+│   │   ├── hello.py
+│   │   └── calculator.py
+│   └── 2025-06-30/
+│       └── web_server.py
+├── javascript-playground/
+│   └── 2025-06-29/
+│       └── app.js
+└── rust-playground/
+    └── 2025-06-29/
+        └── main.rs
+```
+
+## Development
+
+### Setup Development Environment
+
+```bash
+# Clone and install
+git clone https://github.com/AkhileshMalthi/CodePG.git
+cd CodePG
+uv sync --group dev
+
+# Install pre-commit hooks
+uv run pre-commit install
+
+# Run tests
+uv run pytest
+
+# Check code quality
+uv run ruff check codepg/ tests/
+uv run ruff format codepg/ tests/
+uv run mypy codepg/
+
+# Or use the task runner
+uv run python scripts/dev.py all
+make all
+```
+
+### Dev Container (VS Code)
+
+Open the folder in VS Code and choose "Reopen in Container" when prompted. The container installs `uv` and syncs deps automatically.
+
+### Project Structure
+
+```
+codepg/
+├── __init__.py       # Version (from importlib.metadata)
+├── app.py            # Main CLI application
+├── config.py         # Configuration management
+├── utils.py          # Utility functions
+└── logger.py         # Logging setup
+```
 
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- Built with Python and modern tooling (uv, Ruff, MyPy)
+- Code quality ensured by Ruff and MyPy
