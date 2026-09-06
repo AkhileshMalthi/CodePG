@@ -1,124 +1,158 @@
-# CodePG - Code PlayGround
+# CodePG - Code Playground
 
-A simple, fast command-line tool (CLI) that helps organize your coding practice by creating date-organized folders and files for various programming languages.
+CodePG is a command-line tool (CLI) that creates date-organized playground files so you can practice any language without manual folder setup.
+
+You run one command and get a file with a starter template (code snippet inserted at creation) in `~/CodePG/<language>-playground/YYYY-MM-DD/`. Use it when you want to try a language, test an idea, or keep daily practice separated by date.
+
+## How it works
+
+```
+you type:  codepg create hello.py  (or: codepg hello.py)
+                |
+                v
+      +--------------------+
+      | parse filename     |  read extension -> language (utils.py:22)
+      |  hello.py -> python|
+      +--------+-----------+
+               |
+      +--------------------+
+      | build paths        |  base_dir + language + today
+      | ~/CodePG/python-   |  ex: ~/CodePG/python-playground/2026-09-06/hello.py
+      | playground/YYYY-MM-DD|
+      +--------+-----------+
+               |
+      +--------------------+
+      | write template     |  language-specific starter (app.py:23)
+      |  or fallback       |
+      +--------+-----------+
+               |
+      +--------------------+
+      | open in editor     |  runs editor_command with the day folder (app.py:146)
+      |  code "{path}"     |  skip with --no-editor
+      +--------------------+
+```
 
 ## Features
 
-- **Organized Structure**: Creates language-specific folders organized by date
-- **Quick Setup**: One command to create and open files
-- **Configurable**: Customize editor and directories
-- **Cross-Platform**: Works on Windows, macOS, and Linux
-- **20+ Languages**: Support for Python, JavaScript, TypeScript, Rust, Go, and more
-- **Docker Ready**: Run via Docker or Dev Container
+| Feature | What it does |
+|---|---|
+| Date-organized playgrounds | Creates `~/CodePG/<language>-playground/YYYY-MM-DD/<file>` on every run |
+| One-command creation | `codepg create <file>` or shorthand `codepg <file>` |
+| Starter templates | Built-in templates for 20 languages (see table below); unknown extensions get a fallback comment |
+| Editor integration | Opens the day folder in your editor after creation; configure any command |
+| Config cascade | CLI flag, env var, then config file (see Configuration) |
+| Cross-platform | Works on Windows, macOS, Linux; detects `code`, `notepad`, `nano`, `vim` etc. |
+| Docker and dev container | Run without local Python via `Dockerfile` or VS Code Dev Container |
 
-## Quick Start
+## Requirements
 
-### Installation with uv (recommended)
+- Python 3.11 to 3.13
+- [uv](https://docs.astral.sh/uv/) for install and run (recommended)
+
+## Quick start
 
 ```bash
-# Clone the repository
+# 1. Clone
 git clone https://github.com/AkhileshMalthi/CodePG.git
 cd CodePG
 
-# Install uv if you don't have it: https://docs.astral.sh/uv/getting-started/installation/
-# Then sync dependencies
+# 2. Install dependencies
 uv sync --group dev
 
-# Run any command with uv run
+# 3. Check it works
 uv run codepg --help
+
+# 4. Create your first file (also opens in editor)
+uv run codepg create hello.py
+
+# 5. Create without opening editor
+uv run codepg create hello.py --no-editor
 ```
 
-### Installation with pip
+Alternative install without uv:
 
 ```bash
 pip install -e .
+codepg create hello.py
 ```
 
-### Docker
+Docker:
 
 ```bash
-# Build and run
 docker build -t codepg .
 docker run --rm -v "$HOME/CodePG:/playgrounds" codepg create hello.py --no-editor
-# Or use the image interactively
-docker run -it --rm codepg --help
+docker run --rm codepg --help
 ```
 
-### Basic Usage
+Dev container (VS Code): open the folder and choose "Reopen in Container". The container installs `uv` and runs `uv sync --group dev` for you.
+
+## Usage
+
+### Create files
 
 ```bash
-# Create a Python file
-uv run codepg create hello.py
-
-# View configuration
-uv run codepg config --show
-
-# Set your preferred editor
-uv run codepg config --set editor_command "code \"{path}\""
-```
-
-## Usage Examples
-
-### Creating Files
-
-```bash
-# Basic file creation
+# Shorthand also works (no "create" word)
+uv run codepg hello.py
 uv run codepg create calculator.py
 uv run codepg create app.js
 uv run codepg create main.rs
+uv run codepg create Main.java        # class name is sanitized to valid Java
 
-# Skip opening editor
-uv run codepg create test.py --no-editor
-
-# With custom config
+# Use a different config file for one run
 uv run codepg create hello.py --config /path/to/config.json
+
+# List what you created (example)
+ls ~/CodePG/python-playground/2026-09-06/
 ```
 
-### Configuration Management
+If the file already exists, CodePG keeps the existing file and does not overwrite it.
+
+If the extension is not supported, CodePG prints the list of supported extensions and exits with code 1.
+
+### Manage configuration
 
 ```bash
-# Initialize default config
+# Create a default config file at ./codepg_config.json
 uv run codepg config --init
 
-# Show current settings
+# Create at a custom path
+uv run codepg config --init --file /path/to/my.json
+
+# Show current config and where it was loaded from
 uv run codepg config --show
 
-# Customize settings
+# Change a value
 uv run codepg config --set base_dir "D:/MyCodePlaygrounds"
 uv run codepg config --set editor_command "nvim \"{path}\""
 
-# Edit config file directly
+# Open the config file in your editor
 uv run codepg config --edit
 ```
 
 ## Configuration
 
-CodePG looks for configuration in this order:
-1. `--config` argument path
-2. `CODEPG_CONFIG_FILE` environment variable
-3. `./codepg_config.json` (current directory)
-4. `~/.config/codepg/config.json`
-5. `~/.codepg.json`
+CodePG resolves config in this order (first match wins):
 
-### Configuration Options
+| Priority | Source | Example |
+|---|---|---|
+| 1 | `--config` flag | `codepg create hello.py --config ./my.json` |
+| 2 | Env var `CODEPG_CONFIG_FILE` | `CODEPG_CONFIG_FILE=./my.json codepg create hello.py` |
+| 3 | `./codepg_config.json` | Current directory |
+| 4 | `~/.config/codepg/config.json` | User config dir |
+| 5 | `~/.codepg.json` | Home fallback |
+| 6 | Built-in defaults | See table below |
 
-| Option | Description | Default |
-|--------|-------------|---------|
-| `base_dir` | Base directory for playgrounds | `~/CodePG` |
-| `editor_command` | Command to open editor | `code "{path}"` |
+| Option | Env var | Default | Notes |
+|---|---|---|---|
+| `base_dir` | `CODEPG_BASE_DIR` | `~/CodePG` | Root for all playgrounds |
+| `editor_command` | `CODEPG_EDITOR_COMMAND` | `code "{path}"` | Must contain `{path}` placeholder; runs without shell |
 
-### Environment Variables
+`{path}` is replaced with the day folder (e.g. `~/CodePG/python-playground/2026-09-06`). The command is split with `shlex.split` (safe tokenization) and run without shell.
 
-Override any setting with environment variables:
-```bash
-export CODEPG_BASE_DIR="/path/to/playgrounds"
-export CODEPG_EDITOR_COMMAND="vim \"{path}\""
-```
-
-## Supported Languages
+## Supported languages
 
 | Extension | Language | Extension | Language |
-|-----------|----------|-----------|----------|
+|---|---|---|---|
 | `.py` | Python | `.go` | Go |
 | `.js` | JavaScript | `.rs` | Rust |
 | `.ts` | TypeScript | `.java` | Java |
@@ -126,86 +160,77 @@ export CODEPG_EDITOR_COMMAND="vim \"{path}\""
 | `.css` | CSS | `.php` | PHP |
 | `.c` | C | `.rb` | Ruby |
 | `.cpp` | C++ | `.swift` | Swift |
-| `.sh` | Shell | `.kt` | Kotlin |
-| `.sql` | SQL | `.dart` | Dart |
-| `.h` | C Header | `.lua` | Lua |
-| `.hpp` | C++ Header | `.r` | R |
+| `.h` | C Header | `.kt` | Kotlin |
+| `.hpp` | C++ Header | `.sql` | SQL |
+| `.sh` | Shell | `.dart` | Dart |
+| `.lua` | Lua | `.r` | R |
 
-## Directory Structure
+Templates exist for each language above. The Java template sanitizes the filename into a valid class name.
 
-CodePG organizes your files like this:
+## Directory structure
+
 ```
 ~/CodePG/
 ├── python-playground/
-│   ├── 2025-06-29/
+│   ├── 2026-09-06/
 │   │   ├── hello.py
 │   │   └── calculator.py
-│   └── 2025-06-30/
-│       └── web_server.py
+│   └── 2026-09-07/
+│       └── parser.py
 ├── javascript-playground/
-│   └── 2025-06-29/
+│   └── 2026-09-06/
 │       └── app.js
 └── rust-playground/
-    └── 2025-06-29/
+    └── 2026-09-06/
         └── main.rs
 ```
 
 ## Development
 
-### Setup Development Environment
-
 ```bash
-# Clone and install
 git clone https://github.com/AkhileshMalthi/CodePG.git
 cd CodePG
 uv sync --group dev
-
-# Install pre-commit hooks
 uv run pre-commit install
 
-# Run tests
-uv run pytest
-
-# Check code quality
+# Run all checks
 uv run ruff check codepg/ tests/
 uv run ruff format codepg/ tests/
 uv run mypy codepg/
+uv run pytest
 
-# Or use the task runner
+# Shortcuts
 uv run python scripts/dev.py all
 make all
 ```
 
-### Dev Container (VS Code)
-
-Open the folder in VS Code and choose "Reopen in Container" when prompted. The container installs `uv` and syncs deps automatically.
-
-### Project Structure
+Project layout:
 
 ```
 codepg/
-├── __init__.py       # Version (from importlib.metadata)
-├── app.py            # Main CLI application
-├── config.py         # Configuration management
-├── utils.py          # Utility functions
-└── logger.py         # Logging setup
+├── __init__.py       # version from importlib.metadata (import system that reads package version)
+├── app.py            # CLI, file creation, editor launch
+├── config.py         # config load/save and env overrides
+├── utils.py          # language map and editor detection
+└── logger.py         # colored log formatter
+tests/
+├── conftest.py
+├── test_cli.py
+├── test_config.py
+├── test_file_creation.py
+└── test_utils.py
 ```
+
+Tooling: `uv` for package management, `ruff` for lint and format (code style tool), `mypy` for type checking (checks type annotations), `pytest` for tests, `pre-commit` for git hooks (scripts that run before commit).
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+1. Fork the repo
+2. Create a branch: `git checkout -b feature/your-feature`
+3. Commit: `git commit -m "feat: your change"`
+4. Push: `git push origin feature/your-feature`
+5. Open a pull request
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- Built with Python and modern tooling (uv, Ruff, MyPy)
-- Code quality ensured by Ruff and MyPy
+MIT — see [LICENSE](LICENSE).
