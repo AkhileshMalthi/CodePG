@@ -38,8 +38,9 @@ you type:  codepg create hello.py  (or: codepg hello.py)
 |---|---|
 | Date-organized playgrounds | Creates `~/CodePG/<language>-playground/YYYY-MM-DD/<file>` on every run |
 | One-command creation | `codepg create <file>` or shorthand `codepg <file>` |
+| One-command sandboxes | `codepg sandbox <language> [name]` spins up a full project (native init) for learning |
 | Starter templates | Built-in templates for 20 languages (see table below); unknown extensions get a fallback comment |
-| Editor integration | Opens the day folder in your editor after creation; configure any command |
+| Editor integration | Opens the day folder (or sandbox folder) in your editor after creation; configure any command |
 | Config cascade | CLI flag, env var, then config file (see Configuration) |
 | Cross-platform | Works on Windows, macOS, Linux; detects `code`, `notepad`, `nano`, `vim` etc. |
 | Docker and dev container | Run without local Python via `Dockerfile` or VS Code Dev Container |
@@ -109,6 +110,34 @@ If the file already exists, CodePG keeps the existing file and does not overwrit
 
 If the extension is not supported, CodePG prints the list of supported extensions and exits with code 1.
 
+### Create sandboxes
+
+```bash
+# Spin up a full project sandbox for a language (uses native init tools)
+uv run codepg sandbox python                  # random name: sandbox-py-a3f9
+uv run codepg sandbox python my-algos         # custom name
+uv run codepg sandbox python my-algos --git   # also run git init
+uv run codepg sandbox python --no-editor      # skip opening editor
+uv run codepg sandbox --list                  # list supported languages (python, javascript, typescript, go, rust, java)
+
+# Aliases work too: py, js, ts, rs, golang
+uv run codepg sandbox js my-js-lab
+uv run codepg sandbox --help
+```
+
+Sandboxes are created in `~/CodePG/<language>-playground/YYYY-MM-DD/<sandbox-name>/`.
+
+| Language | Native init (tried first) | Fallback if tool missing |
+|---|---|---|
+| `python` | `uv init --name <name> --bare` | `main.py` + `pyproject.toml` + `README.md` |
+| `javascript` | `npm init -y` | `index.js` + `package.json` + `README.md` |
+| `typescript` | `npm init -y` + `tsconfig.json` | `index.ts` + `package.json` + `tsconfig.json` |
+| `go` | `go mod init <name>` | `main.go` + `go.mod` + `README.md` |
+| `rust` | `cargo init --name <name> --bin --vcs none` | `main.rs` + `Cargo.toml` + `README.md` |
+| `java` | (no native init) | `<Class>.java` + `README.md` |
+
+If the native tool is not installed, CodePG falls back to a minimal scaffold so the command always succeeds. If the sandbox folder already exists and is non-empty, it is kept and not overwritten (same as single-file `create`).
+
 ### Manage configuration
 
 ```bash
@@ -174,7 +203,14 @@ Templates exist for each language above. The Java template sanitizes the filenam
 ├── python-playground/
 │   ├── 2026-09-06/
 │   │   ├── hello.py
-│   │   └── calculator.py
+│   │   ├── calculator.py
+│   │   ├── my-algos/              # sandbox: uv init
+│   │   │   ├── pyproject.toml
+│   │   │   ├── main.py
+│   │   │   └── README.md
+│   │   └── sandbox-py-a3f9/       # auto-named sandbox
+│   │       ├── pyproject.toml
+│   │       └── main.py
 │   └── 2026-09-07/
 │       └── parser.py
 ├── javascript-playground/
@@ -182,7 +218,10 @@ Templates exist for each language above. The Java template sanitizes the filenam
 │       └── app.js
 └── rust-playground/
     └── 2026-09-06/
-        └── main.rs
+        ├── main.rs
+        └── my-rs-lab/             # sandbox: cargo init
+            ├── Cargo.toml
+            └── src/main.rs
 ```
 
 ## Development
@@ -209,9 +248,10 @@ Project layout:
 ```
 codepg/
 ├── __init__.py       # version from importlib.metadata (import system that reads package version)
-├── app.py            # CLI, file creation, editor launch
+├── app.py            # CLI, file creation, sandbox routing, editor launch
+├── sandbox.py        # sandbox creation (native init + fallback)
 ├── config.py         # config load/save and env overrides
-├── utils.py          # language map and editor detection
+├── utils.py          # language map, sandbox language map, editor detection
 └── logger.py         # colored log formatter
 tests/
 ├── conftest.py

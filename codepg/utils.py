@@ -81,6 +81,66 @@ def detect_default_editor() -> str | None:
     return None
 
 
+def get_sandbox_languages() -> dict[str, str]:
+    """
+    Get languages that support sandbox creation.
+
+    Returns:
+        Dict[str, str]: Mapping of language name to display name for sandbox.
+    """
+    return {
+        "python": "python",
+        "javascript": "javascript",
+        "typescript": "typescript",
+        "go": "go",
+        "rust": "rust",
+        "java": "java",
+    }
+
+
+# Aliases that map shorthand input to canonical language names
+_LANGUAGE_ALIASES: dict[str, str] = {
+    "py": "python",
+    "python": "python",
+    "js": "javascript",
+    "javascript": "javascript",
+    "ts": "typescript",
+    "typescript": "typescript",
+    "go": "go",
+    "golang": "go",
+    "rs": "rust",
+    "rust": "rust",
+    "java": "java",
+}
+
+
+def normalize_language(raw: str) -> str | None:
+    """
+    Normalize a user-supplied language string to canonical name.
+
+    Parameters:
+        raw (str): User input such as 'Python', 'js', 'GO'.
+
+    Returns:
+        str | None: Canonical language name or None if not a sandbox language.
+    """
+    key = raw.strip().lower()
+    return _LANGUAGE_ALIASES.get(key)
+
+
+def get_language_by_name(name: str) -> str | None:
+    """
+    Resolve a language name to its canonical sandbox language.
+
+    Parameters:
+        name (str): User-supplied language name.
+
+    Returns:
+        str | None: Canonical name if supported, else None.
+    """
+    return normalize_language(name)
+
+
 def is_command_available(cmd: str) -> bool:
     """
     Check if a command is available in the system.

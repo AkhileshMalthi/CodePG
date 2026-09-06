@@ -229,6 +229,32 @@ def main() -> int:
         "--edit", action="store_true", help="Open the configuration file in your default editor"
     )
 
+    # Sandbox command
+    sandbox_parser = subparsers.add_parser("sandbox", help="Create a language sandbox")
+    sandbox_parser.add_argument(
+        "language",
+        nargs="?",
+        type=str,
+        help="Language name (e.g. python, javascript, go, rust, java)",
+    )
+    sandbox_parser.add_argument(
+        "name",
+        nargs="?",
+        type=str,
+        default=None,
+        help="Sandbox folder name (default: sandbox-<lang>-<suffix>)",
+    )
+    sandbox_parser.add_argument("--config", "-c", type=str, help="Path to the configuration file.")
+    sandbox_parser.add_argument(
+        "--no-editor", action="store_true", help="Don't open the editor after creating the sandbox."
+    )
+    sandbox_parser.add_argument(
+        "--git", action="store_true", help="Initialize a git repo in the sandbox."
+    )
+    sandbox_parser.add_argument(
+        "--list", action="store_true", help="List supported sandbox languages."
+    )
+
     # For backward compatibility: if no subcommand is provided but a filename is, use 'create'
     args, unknown = parser.parse_known_args()
     if not args.command and unknown and not unknown[0].startswith("-"):
@@ -277,6 +303,67 @@ def main() -> int:
             if not open_in_editor(today_folder, config):
                 logger.warning("Failed to open editor but file was created successfully.")
                 print("Warning: Failed to open editor but file was created successfully.")
+        return 0
+
+    # Handle sandbox creation
+    if args.command == "sandbox":
+        return handle_sandbox_command(args)
+
+    return 0
+
+
+def handle_sandbox_command(args: Any) -> int:
+    """
+    Handle sandbox creation command.
+
+    Parameters:
+        args: Parsed arguments with language, name, config, no_editor, git, list.
+
+    Returns:
+        int: Exit code.
+    """
+    # --list does not need language
+    if getattr(args, "list", False):
+        from codepg.sandbox import list_sandbox_languages
+
+        list_sandbox_languages()
+        return 0
+
+    language = getattr(args, "language", None)
+    if not language:
+        print(
+            "Error: language is required. Usage: codepg sandbox <language> [name] [--git] [--no-editor]"
+        )
+        print("Run `codepg sandbox --list` to see supported languages.")
+        return 1
+
+    sandbox_name = getattr(args, "name", None)
+    # When name looks like a flag, treat as missing (argparse already handles, but be safe)
+    if sandbox_name and sandbox_name.startswith("-"):
+        print(f"Error: Invalid sandbox name: {sandbox_name}")
+        return 1
+
+    config_path = getattr(args, "config", None)
+    use_git = bool(getattr(args, "git", False))
+    no_editor = bool(getattr(args, "no_editor", False))
+
+    try:
+        config = Config(config_path=config_path)
+    except Exception as e:
+        logger.error(f"Error loading configuration: {e}")
+        print(f"Error loading configuration: {e}")
+        return 1
+
+    from codepg.sandbox import create_sandbox
+
+    created = create_sandbox(language, sandbox_name, config, use_git=use_git)
+    if not created:
+        return 1
+
+    if not no_editor:
+        if not open_in_editor(created, config):
+            logger.warning("Failed to open editor but sandbox was created successfully.")
+            print("Warning: Failed to open editor but sandbox was created successfully.")
 
     return 0
 
